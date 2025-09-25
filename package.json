@@ -16,7 +16,7 @@
     "clean": "rimraf dist",
     "ts": "ts-node",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "cli": "node --loader ts-node/esm ./src/cli.ts"
+    "cli": "node --loader ts-node/esm ./src/main.ts"
   },
   "devDependencies": {
     "@types/node": "^18.16.3",
