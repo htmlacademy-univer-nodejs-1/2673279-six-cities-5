@@ -1,0 +1,168 @@
+{
+  "offers": [
+    {
+      "title": "Уютная студия у реки",
+      "description": "Светлая и тихая студия в центре Амстердама. Идеально подходит для пар и одиночных путешественников. Полностью оборудованная кухня и прекрасный вид на канал.",
+      "postDate": "2025-10-20",
+      "city": "Амстердам",
+      "previewImage": "/img/apartment-01.jpg",
+      "images": [
+        "/img/room.jpg",
+        "/img/apartment-02.jpg"
+      ],
+      "isPremium": true,
+      "isFavorite": false,
+      "rating": 4.8,
+      "type": "apartment",
+      "bedrooms": 1,
+      "maxAdults": 2,
+      "price": 130,
+      "goods": [
+        "Завтрак",
+        "Кондиционер",
+        "Wi-Fi"
+      ],
+      "host": {
+        "name": "Ангелина",
+        "email": "angelina@test.com",
+        "avatarUrl": "/img/avatar-angelina.jpg",
+        "type": "pro"
+      },
+      "coordinates": {
+        "latitude": 52.370216,
+        "longitude": 4.895168
+      }
+    },
+    {
+      "title": "Просторный дом в Париже",
+      "description": "Большой дом с садом, идеально подходит для семейного отдыха. Три спальни, гостиная с камином и полностью оборудованная кухня.",
+      "postDate": "2025-10-22",
+      "city": "Париж",
+      "previewImage": "/img/apartment-02.jpg",
+      "images": [
+        "/img/apartment-01.jpg",
+        "/img/room.jpg"
+      ],
+      "isPremium": false,
+      "isFavorite": true,
+      "rating": 4.5,
+      "type": "house",
+      "bedrooms": 3,
+      "maxAdults": 6,
+      "price": 250,
+      "goods": [
+        "Стиральная машина",
+        "Холодильник",
+        "Wi-Fi"
+      ],
+      "host": {
+        "name": "Максим",
+        "email": "max@test.com",
+        "avatarUrl": "/img/avatar-max.jpg",
+        "type": "обычный"
+      },
+      "coordinates": {
+        "latitude": 48.85661,
+        "longitude": 2.351499
+      }
+    },
+    {
+      "title": "Апартаменты в центре Брюсселя",
+      "description": "Современные апартаменты в двух шагах от центральной площади. Отличный выбор для деловых поездок и туризма.",
+      "postDate": "2025-11-05",
+      "city": "Брюссель",
+      "previewImage": "/img/apartment-03.jpg",
+      "images": [
+        "/img/apartment-02.jpg",
+        "/img/room.jpg"
+      ],
+      "isPremium": true,
+      "isFavorite": true,
+      "rating": 4.9,
+      "type": "apartment",
+      "bedrooms": 2,
+      "maxAdults": 4,
+      "price": 180,
+      "goods": [
+        "Кондиционер",
+        "Wi-Fi",
+        "Полотенца"
+      ],
+      "host": {
+        "name": "Елена",
+        "email": "elena@test.com",
+        "avatarUrl": "/img/avatar-elena.jpg",
+        "type": "pro"
+      },
+      "coordinates": {
+        "latitude": 50.846557,
+        "longitude": 4.351697
+      }
+    },
+    {
+      "title": "Комната в историческом здании Кёльна",
+      "description": "Уникальная возможность пожить в историческом центре города. Комната с отдельной ванной и видом на собор.",
+      "postDate": "2025-11-10",
+      "city": "Кёльн",
+      "previewImage": "/img/room.jpg",
+      "images": [
+        "/img/apartment-01.jpg",
+        "/img/apartment-03.jpg"
+      ],
+      "isPremium": false,
+      "isFavorite": false,
+      "rating": 4.3,
+      "type": "room",
+      "bedrooms": 1,
+      "maxAdults": 2,
+      "price": 90,
+      "goods": [
+        "Wi-Fi",
+        "Полотенца"
+      ],
+      "host": {
+        "name": "Петер",
+        "email": "peter@test.com",
+        "avatarUrl": "/img/avatar-peter.jpg",
+        "type": "обычный"
+      },
+      "coordinates": {
+        "latitude": 50.938361,
+        "longitude": 6.959974
+      }
+    },
+    {
+      "title": "Лофт в порту Гамбурга",
+      "description": "Стильный лофт с панорамными окнами и видом на порт. Открытая планировка, современный дизайн.",
+      "postDate": "2025-11-15",
+      "city": "Гамбург",
+      "previewImage": "/img/apartment-01.jpg",
+      "images": [
+        "/img/room.jpg",
+        "/img/apartment-02.jpg"
+      ],
+      "isPremium": true,
+      "isFavorite": false,
+      "rating": 4.7,
+      "type": "apartment",
+      "bedrooms": 2,
+      "maxAdults": 3,
+      "price": 210,
+      "goods": [
+        "Wi-Fi",
+        "Кухня",
+        "Кондиционер"
+      ],
+      "host": {
+        "name": "Ангелина",
+        "email": "angelina@test.com",
+        "avatarUrl": "/img/avatar-angelina.jpg",
+        "type": "pro"
+      },
+      "coordinates": {
+        "latitude": 53.550341,
+        "longitude": 10.000654
+      }
+    }
+  ]
+}
