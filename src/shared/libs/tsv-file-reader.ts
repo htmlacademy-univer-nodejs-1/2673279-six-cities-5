@@ -25,7 +25,7 @@ export class TSVFileReader extends EventEmitter implements FileReader {
         remainingData = remainingData.slice(++nextLinePosition);
         importedRowCount++;
 
-        if (importedRowCount > 1) { // Пропускаем заголовок
+        if (importedRowCount > 1) {
           this.emit('line', completeRow);
         }
       }
