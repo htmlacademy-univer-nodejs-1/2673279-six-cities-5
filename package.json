@@ -46,6 +46,8 @@
     "dotenv": "^17.2.3",
     "got": "^14.4.9",
     "inversify": "^7.10.3",
+    "mongo-express": "^1.1.0-rc-3",
+    "mongoose": "^8.19.2",
     "pino": "^10.0.0",
     "reflect-metadata": "^0.2.2"
   }
