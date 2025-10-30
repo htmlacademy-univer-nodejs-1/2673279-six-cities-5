@@ -7,7 +7,7 @@ import { Logger } from '../logger/index.js';
 @injectable()
 export class MongoDatabaseClient implements DatabaseClient {
   private mongooseInstance: Mongoose | null = null;
-  private isConnectedFlag: boolean = false;
+  private isConnectedFlag = false;
 
   constructor(
     @inject(Component.Logger) private readonly logger: Logger
