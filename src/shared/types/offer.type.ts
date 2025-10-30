@@ -11,7 +11,6 @@ export type Offer = {
   previewImage: string;
   images: string[];
   isPremium: boolean;
-  isFavorite: boolean;
   rating: number;
   type: HousingType;
   bedrooms: number;
@@ -19,7 +18,6 @@ export type Offer = {
   price: number;
   goods: Goods[];
   host: User;
-  commentsCount: number;
   coordinates: {
     latitude: number;
     longitude: number;
