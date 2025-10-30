@@ -9,7 +9,7 @@ export class TSVFileReader extends EventEmitter implements FileReader {
 
   public async read(): Promise<void> {
     const readStream = createReadStream(this.filename, {
-      highWaterMark: 16384, // 16KB
+      highWaterMark: 16384,
       encoding: 'utf-8',
     });
 

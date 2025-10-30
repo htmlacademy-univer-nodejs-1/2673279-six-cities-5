@@ -5,7 +5,7 @@ convict.addFormats(validator);
 
 export interface RestSchema {
   PORT: number;
-  SALT: string | null; 
+  SALT: string | null;
   DB_HOST: string;
   DB_USER: string;
   DB_PASSWORD: string;
@@ -24,7 +24,7 @@ export const restSchema = convict<RestSchema>({
     doc: 'Salt for password hashing',
     format: String,
     env: 'SALT',
-    default: null 
+    default: null
   },
   DB_HOST: {
     doc: 'IP address of the database server',

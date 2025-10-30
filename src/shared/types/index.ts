@@ -5,3 +5,6 @@ export * from './offer.type.js';
 export * from './user.type.js';
 export * from './mock-offer.type.js';
 export * from './component.enum.js';
+export * from './offer-data.type.js';
+export * from './location.type.js';
+export * from './category.type.js';
