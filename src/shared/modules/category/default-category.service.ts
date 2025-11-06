@@ -1,4 +1,4 @@
-import { CategoryEntity, CategoryModel } from './category.entity.js';
+import { CategoryEntity } from './category.entity.js';
 import { CreateCategoryDto } from './dto/index.js';
 import { CategoryService } from './category-service.interface.js';
 import { Logger } from '../../libs/logger/index.js';
@@ -33,5 +33,9 @@ export class DefaultCategoryService implements CategoryService {
       return existedCategory;
     }
     return this.create(dto);
+  }
+
+  public async find(): Promise<DocumentType<CategoryEntity>[]> {
+    return this.categoryModel.find().exec() as unknown as DocumentType<CategoryEntity>[];
   }
 }
