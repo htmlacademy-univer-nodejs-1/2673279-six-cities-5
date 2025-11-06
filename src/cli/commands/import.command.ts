@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { Command } from './command.interface.js';
-import { TSVFileReader } from '../../shared/libs/tsv-file-reader.js';
+import { TSVFileReader } from '../../shared/libs/file-reader/tsv-file-reader.js';
 import { createOffer, getMongoURI } from '../../shared/helpers/index.js';
 import { Logger, PinoLogger } from '../../shared/libs/logger/index.js';
 

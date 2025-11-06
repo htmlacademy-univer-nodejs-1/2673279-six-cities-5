@@ -1,6 +1,6 @@
 import { Command } from './command.interface.js';
 import { MockOffer } from '../../shared/types/index.js';
-import { TSVFileWriter } from '../../shared/libs/tsv-file-writer.js';
+import { TSVFileWriter } from '../../shared/libs/file-reader/tsv-file-writer.js';
 import { getRandomItem, getRandomNumber } from '../../shared/helpers/common.js';
 import axios from 'axios';
 import chalk from 'chalk';
