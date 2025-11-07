@@ -1,0 +1,551 @@
+openapi: 3.1.0
+info:
+  title: API сервер для демо-проекта «Шесть городов».
+  description: |
+    * Список ресурсов и маршрутов сервера «Шесть городов».
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  version: 2.0.0
+
+tags:
+  - name: Offers
+    description: Действия с объявлениями.
+  - name: Comments
+    description: Действия с комментариями.
+  - name: Users
+    description: Действия с пользователем.
+  - name: Favorites
+    description: Действия с избранным.
+  - name: Categories
+    description: Действия с категориями.
+
+servers:
+  - url: /api
+    description: Development server
+
+components:
+  securitySchemes:
+    TokenAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    CityName:
+      type: string
+      enum: [Paris, Cologne, Brussels, Amsterdam, Hamburg, Dusseldorf]
+    PropertyType:
+      type: string
+      enum: [apartment, house, room, hotel]
+    Amenities:
+      type: string
+      enum: [Breakfast, Air conditioning, Laptop friendly workspace, Baby seat, Washer, Towels, Fridge]
+    
+    Coordinates:
+      type: object
+      additionalProperties: false
+      required: [latitude, longitude]
+      properties:
+        latitude:
+          type: number
+          format: float
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          format: float
+          minimum: -180
+          maximum: 180
+
+    CreateUserDto:
+      type: object
+      additionalProperties: false
+      required: [email, name, password, type]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        name:
+          type: string
+          minLength: 1
+          maxLength: 15
+        password:
+          type: string
+          minLength: 6
+          maxLength: 12
+        type:
+          type: string
+          enum: [обычный, pro]
+          default: обычный
+        avatarUrl:
+          type: string
+          format: uri
+
+    User:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        avatarUrl:
+          type: string
+        type:
+          type: string
+          enum: [обычный, pro]
+
+    CreateOfferDto:
+      type: object
+      additionalProperties: false
+      required: [title, description, city, previewImage, images, isPremium, type, bedrooms, maxAdults, price, goods, coordinates]
+      properties:
+        title:
+          type: string
+          minLength: 10
+          maxLength: 100
+        description:
+          type: string
+          minLength: 20
+          maxLength: 1024
+        city:
+          $ref: '#/components/schemas/CityName'
+        previewImage:
+          type: string
+          format: uri 
+        images:
+          type: array
+          items:
+            type: string
+            format: uri
+          minItems: 6
+          maxItems: 6
+        isPremium:
+          type: boolean
+        type:
+          $ref: '#/components/schemas/PropertyType'
+        bedrooms:
+          type: integer
+          minimum: 1
+          maximum: 8
+        maxAdults:
+          type: integer
+          minimum: 1
+          maximum: 10
+        price:
+          type: integer
+          minimum: 100
+          maximum: 100000
+        goods:
+          type: array
+          items:
+            $ref: '#/components/schemas/Amenities'
+          minItems: 1
+        coordinates:
+          $ref: '#/components/schemas/Coordinates'
+
+    UpdateOfferDto:
+      type: object
+      additionalProperties: false
+      properties:
+        title:
+          $ref: '#/components/schemas/CreateOfferDto/properties/title'
+        description:
+          $ref: '#/components/schemas/CreateOfferDto/properties/description'
+
+    Offer:
+      allOf:
+        - $ref: '#/components/schemas/CreateOfferDto'
+        - type: object
+          additionalProperties: false
+          properties:
+            id:
+              type: string
+            postDate:
+              type: string
+              format: date-time
+            rating:
+              type: number
+              minimum: 1
+              maximum: 5
+            commentsCount:
+              type: integer
+            host:
+              $ref: '#/components/schemas/User'
+            isFavorite:
+              type: boolean
+
+    OfferShort:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        postDate:
+          type: string
+          format: date-time
+        city:
+          $ref: '#/components/schemas/CityName'
+        previewImage:
+          type: string
+        isPremium:
+          type: boolean
+        rating:
+          type: number
+        type:
+          $ref: '#/components/schemas/PropertyType'
+        price:
+          type: integer
+        commentsCount:
+          type: integer
+        isFavorite:
+          type: boolean
+    
+    CreateCommentDto:
+      type: object
+      additionalProperties: false
+      required: [text, rating]
+      properties:
+        text:
+          type: string
+          minLength: 5
+          maxLength: 1024
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+
+    Comment:
+      allOf:
+        - $ref: '#/components/schemas/CreateCommentDto'
+        - type: object
+          additionalProperties: false
+          properties:
+            id:
+              type: string
+            postDate:
+              type: string
+              format: date-time
+            author:
+              $ref: '#/components/schemas/User'
+
+paths:
+  /users:
+    post:
+      summary: '5.8. Регистрация нового пользователя'
+      description: 'Доступен только анонимам.'
+      tags: ['Users']
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserDto'
+      responses:
+        '201':
+          description: Пользователь успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Неверные данные пользователя
+        '409':
+          description: Пользователь с таким email уже существует.
+  
+  /users/login:
+    post:
+      summary: '5.9. Вход в приложение'
+      description: 'Авторизует пользователя на основе логина и пароля.'
+      tags: ['Users']
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginUserDto'
+      responses:
+        '200':
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '401':
+          description: Неверный логин или пароль
+
+  /users/status:
+    get:
+      summary: '5.11. Проверка состояния пользователя'
+      description: 'Возвращает информацию по авторизованному пользователю.'
+      tags: ['Users']
+      security:
+        - TokenAuth: []
+      responses:
+        '200':
+          description: Пользователь авторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Пользователь не авторизован
+
+  /offers:
+    get:
+      summary: '5.4. Список предложений'
+      description: 'Возвращает список предложений (по умолчанию 60). Отсортирован по дате.'
+      tags: ['Offers']
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 60
+            maximum: 60
+          description: 'Количество предложений (макс. 60).'
+      responses:
+        '200':
+          description: Список предложений (краткий формат, 5.4.6)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OfferShort'
+    post:
+      summary: '5.1. Создать предложение'
+      description: 'Создает новое предложение. Только авторизованным.'
+      tags: ['Offers']
+      security:
+        - TokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOfferDto'
+      responses:
+        '201':
+          description: Предложение создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Offer'
+        '400':
+          description: Неверные данные предложения
+        '401':
+          description: Не авторизован
+
+  /offers/{offerId}:
+    parameters:
+      - name: offerId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: '5.5. Детальная информация о предложении'
+      description: 'Возвращает полную информацию.'
+      tags: ['Offers']
+      responses:
+        '200':
+          description: Детальная информация о предложении
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Offer'
+        '404':
+          description: Предложение не найдено
+
+    patch:
+      summary: '5.2. Редактировать предложение'
+      description: 'Редактирует свое предложение. Только авторизованным.'
+      tags: ['Offers']
+      security:
+        - TokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOfferDto'
+      responses:
+        '200':
+          description: Предложение обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Offer'
+        '400':
+          description: Неверные данные
+        '401':
+          description: Не авторизован
+        '403':
+          description: Нет прав для редактирования
+        '404':
+          description: Предложение не найдено
+
+    delete:
+      summary: '5.3. Удалить предложение'
+      description: 'Удаляет свое предложение. Только авторизованным.'
+      tags: ['Offers']
+      security:
+        - TokenAuth: []
+      responses:
+        '204':
+          description: Предложение удалено
+        '401':
+          description: Не авторизован
+        '403':
+          description: Нет прав для удаления
+        '404':
+          description: Предложение не найдено
+
+  /offers/premium/{city}:
+    get:
+      summary: '5.12. Премиальные предложения для города'
+      description: 'Возвращает до 3 премиальных предложений.'
+      tags: ['Offers']
+      parameters:
+        - name: city
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/CityName'
+      responses:
+        '200':
+          description: Список премиальных предложений
+          content:
+            application/json:
+              schema:
+                type: array
+                maxItems: 3
+                items:
+                  $ref: '#/components/schemas/OfferShort'
+
+  /favorites:
+    get:
+      summary: '5.13. Список избранных предложений'
+      description: 'Возвращает предложения, добавленные в избранное. Только авторизованным.'
+      tags: ['Favorites']
+      security:
+        - TokenAuth: []
+      responses:
+        '200':
+          description: Список избранных предложений
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OfferShort'
+        '401':
+          description: Не авторизован
+
+  /favorites/{offerId}:
+    post:
+      summary: '5.14. Добавить в избранное'
+      description: 'Добавляет предложение в избранное. Только авторизованным.'
+      tags: ['Favorites']
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: offerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Предложение добавлено в избранное
+        '401':
+          description: Не авторизован
+        '404':
+          description: Предложение не найдено
+
+    delete:
+      summary: '5.14. Удалить из избранного'
+      description: 'Удаляет предложение из избранного. Только авторизованным.'
+      tags: ['Favorites']
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: offerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Предложение удалено из избранного
+        '401':
+          description: Не авторизован
+        '404':
+          description: Предложение не найдено
+
+  /comments/{offerId}:
+    get:
+      summary: '5.6. Комментарии предложения'
+      description: 'Возвращает до 50 последних комментариев.'
+      tags: ['Comments']
+      parameters:
+        - name: offerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список комментариев
+          content:
+            application/json:
+              schema:
+                type: array
+                maxItems: 50
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '404':
+          description: Предложение не найдено
+
+    post:
+      summary: '5.7. Добавить комментарий'
+      description: 'Добавляет комментарий к предложению. Только авторизованным.'
+      tags: ['Comments']
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: offerId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentDto'
+      responses:
+        '201':
+          description: Комментарий добавлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: Неверные данные комментария
+        '401':
+          description: Не авторизован
+        '404':
+          description: Предложение не найдено
