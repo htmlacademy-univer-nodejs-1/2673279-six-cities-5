@@ -1,6 +1,3 @@
-# -----------------------------------------------------------------
-# Файл: specification/specification.yml (АДАПТИРОВАННЫЙ ПОД СТИЛЬ ПРИМЕРА)
-# -----------------------------------------------------------------
 openapi: 3.1.0
 info:
   title: API сервер для демо-проекта «Шесть городов».
@@ -21,35 +18,31 @@ tags:
   - name: Favorites
     description: Действия с избранным.
   - name: Categories
-    description: Действия с категориями. # Добавлено для полноты
+    description: Действия с категориями.
 
 servers:
   - url: /api
     description: Development server
 
-# =================================================================
-# COMPONENTS (СХЕМЫ И БЕЗОПАСНОСТЬ)
-# =================================================================
 components:
   securitySchemes:
-    TokenAuth: # Используем TokenAuth (как в моем варианте)
+    TokenAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
 
   schemas:
-    # --- Общие типы ---
-    CityName: # Замена cityName
+    CityName:
       type: string
       enum: [Paris, Cologne, Brussels, Amsterdam, Hamburg, Dusseldorf]
-    PropertyType: # Замена PropertyType
+    PropertyType:
       type: string
       enum: [apartment, house, room, hotel]
-    Amenities: # Замена amenities
+    Amenities:
       type: string
       enum: [Breakfast, Air conditioning, Laptop friendly workspace, Baby seat, Washer, Towels, Fridge]
     
-    Coordinates: # Замена coordinates
+    Coordinates:
       type: object
       additionalProperties: false
       required: [latitude, longitude]
@@ -65,8 +58,7 @@ components:
           minimum: -180
           maximum: 180
 
-    # --- Пользовательские DTO и Сущность ---
-    CreateUserDto: # Замена createUser
+    CreateUserDto:
       type: object
       additionalProperties: false
       required: [email, name, password, type]
@@ -75,7 +67,7 @@ components:
           type: string
           format: email
           maxLength: 255
-        name: # Используем name, а не firstname, как в ТЗ
+        name:
           type: string
           minLength: 1
           maxLength: 15
@@ -83,15 +75,15 @@ components:
           type: string
           minLength: 6
           maxLength: 12
-        type: # Используем type, а не userType, как в ТЗ
+        type:
           type: string
           enum: [обычный, pro]
           default: обычный
-        avatarUrl: # Замена avatarPath
+        avatarUrl:
           type: string
           format: uri
 
-    User: # Замена user
+    User:
       type: object
       additionalProperties: false
       properties:
@@ -100,16 +92,15 @@ components:
         email:
           type: string
           format: email
-        name: # Используем name, а не firstname
+        name:
           type: string
-        avatarUrl: # Используем avatarUrl
+        avatarUrl:
           type: string
-        type: # Используем type
+        type:
           type: string
           enum: [обычный, pro]
 
-    # --- Предложение: DTO ---
-    CreateOfferDto: # Замена createOffer
+    CreateOfferDto:
       type: object
       additionalProperties: false
       required: [title, description, city, previewImage, images, isPremium, type, bedrooms, maxAdults, price, goods, coordinates]
@@ -126,7 +117,7 @@ components:
           $ref: '#/components/schemas/CityName'
         previewImage:
           type: string
-          format: uri # Добавляем формат URI для валидации
+          format: uri 
         images:
           type: array
           items:
@@ -158,7 +149,7 @@ components:
         coordinates:
           $ref: '#/components/schemas/Coordinates'
 
-    UpdateOfferDto: # Замена updateOffer
+    UpdateOfferDto:
       type: object
       additionalProperties: false
       properties:
@@ -166,33 +157,30 @@ components:
           $ref: '#/components/schemas/CreateOfferDto/properties/title'
         description:
           $ref: '#/components/schemas/CreateOfferDto/properties/description'
-        # ... (здесь должны быть все поля из CreateOfferDto, но опциональные)
-        # Для простоты пока оставим только эти.
-    
-    # --- Предложение: Сущность (Offer) ---
-    Offer: # Замена offer
+
+    Offer:
       allOf:
-        - $ref: '#/components/schemas/CreateOfferDto' # Включает все поля создания
+        - $ref: '#/components/schemas/CreateOfferDto'
         - type: object
           additionalProperties: false
           properties:
             id:
               type: string
-            postDate: # Замена postedDate
+            postDate:
               type: string
               format: date-time
             rating:
               type: number
               minimum: 1
               maximum: 5
-            commentsCount: # Замена commentCount
+            commentsCount:
               type: integer
-            host: # Ссылка на автора
+            host:
               $ref: '#/components/schemas/User'
             isFavorite:
               type: boolean
 
-    OfferShort: # Замена offerShort
+    OfferShort:
       type: object
       additionalProperties: false
       properties:
@@ -215,13 +203,12 @@ components:
           $ref: '#/components/schemas/PropertyType'
         price:
           type: integer
-        commentsCount: # Замена commentCount
+        commentsCount:
           type: integer
         isFavorite:
-          type: boolean # Добавлено по ТЗ (п. 5.4.6)
+          type: boolean
     
-    # --- Комментарий ---
-    CreateCommentDto: # Замена createComment
+    CreateCommentDto:
       type: object
       additionalProperties: false
       required: [text, rating]
@@ -235,7 +222,7 @@ components:
           minimum: 1
           maximum: 5
 
-    Comment: # Замена comment
+    Comment:
       allOf:
         - $ref: '#/components/schemas/CreateCommentDto'
         - type: object
@@ -243,17 +230,14 @@ components:
           properties:
             id:
               type: string
-            postDate: # Замена createdAt
+            postDate:
               type: string
               format: date-time
-            author: # Ссылка на автора (п. 3.3.1)
+            author:
               $ref: '#/components/schemas/User'
-# =================================================================
-# PATHS (МАРШРУТЫ)
-# (Адаптированы к унифицированным именам схем и ТЗ)
-# =================================================================
+
 paths:
-  /users: # Регистрация и получение статуса (объединено)
+  /users:
     post:
       summary: '5.8. Регистрация нового пользователя'
       description: 'Доступен только анонимам.'
@@ -261,7 +245,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json: # Используем JSON
+          application/json:
             schema:
               $ref: '#/components/schemas/CreateUserDto'
       responses:
@@ -284,7 +268,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json: # Используем JSON, а не form-urlencoded
+          application/json:
             schema:
               $ref: '#/components/schemas/LoginUserDto'
       responses:
@@ -300,7 +284,7 @@ paths:
         '401':
           description: Неверный логин или пароль
 
-  /users/status: # Проверка состояния
+  /users/status:
     get:
       summary: '5.11. Проверка состояния пользователя'
       description: 'Возвращает информацию по авторизованному пользователю.'
@@ -328,7 +312,7 @@ paths:
           schema:
             type: integer
             default: 60
-            maximum: 60 # По ТЗ 5.4.1
+            maximum: 60
           description: 'Количество предложений (макс. 60).'
       responses:
         '200':
@@ -528,7 +512,7 @@ paths:
             application/json:
               schema:
                 type: array
-                maxItems: 50 # По ТЗ 5.6.2
+                maxItems: 50
                 items:
                   $ref: '#/components/schemas/Comment'
         '404':
