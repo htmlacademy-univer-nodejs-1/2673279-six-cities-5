@@ -59,6 +59,9 @@ export class OfferEntity extends defaultClasses.TimeStamps implements Omit<Offer
 
   @prop({ required: true, _id: false })
   public coordinates!: Location;
+
+  @prop({ default: 0 })
+  public commentsCount!: number;
 }
 
 export const OfferModel = getModelForClass(OfferEntity);
