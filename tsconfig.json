@@ -11,7 +11,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
-  "include": ["src/**/*.ts", "src/shared/modules/offer/dto/update-offer.dtot.s"],
+  "include": ["src/**/*.ts"],
   "ts-node": {
     "esm": true
   }
