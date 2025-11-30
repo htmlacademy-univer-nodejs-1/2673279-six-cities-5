@@ -3,7 +3,7 @@ import { OfferData, City, Goods, HousingType } from '../types/index.js';
 export function createOffer(tsvRow: string): OfferData {
   const [
     title, description, postDate, city, previewImage, images,
-    isPremium, /* isFavorite убрали */ rating, type, bedrooms, maxAdults,
+    isPremium, rating, type, bedrooms, maxAdults,
     price, goods, hostName, hostEmail, hostAvatar, hostType,
     latitude, longitude
   ] = tsvRow.replace('\n', '').split('\t');

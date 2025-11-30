@@ -18,6 +18,7 @@ export class RestApplication {
     @inject(Component.ExceptionFilter) private readonly appExceptionFilter: ExceptionFilter,
     @inject(Component.UserController) private readonly userController: Controller,
     @inject(Component.OfferController) private readonly offerController: Controller,
+    @inject(Component.FavoritesController) private readonly favoritesController: Controller,
   ) {
     this.server = express();
   }
@@ -49,6 +50,7 @@ export class RestApplication {
     this.logger.info('Controller initialization');
     this.server.use('/users', this.userController.router);
     this.server.use('/offers', this.offerController.router);
+    this.server.use('/favorites', this.favoritesController.router);
   }
 
   private async _initExceptionFilters() {
@@ -65,7 +67,7 @@ export class RestApplication {
     this.logger.info('Init database completed');
 
     this.logger.info('Init app-level middleware');
-    await this._initMiddleware(); // <-- ВЫЗОВ МЕТОДА
+    await this._initMiddleware();
     this.logger.info('App-level middleware initialization completed');
 
     this.logger.info('Init controllers');
