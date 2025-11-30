@@ -7,6 +7,7 @@ export interface UserEntity extends defaultClasses.Base {}
 
 @modelOptions({
   schemaOptions: {
+    collection: 'users',
     timestamps: true,
   }
 })
@@ -35,7 +36,7 @@ export class UserEntity extends defaultClasses.TimeStamps implements User {
   }
 
   public async setPassword(password: string, salt: string): Promise<void> {
-    this.password = await hash(password, salt);
+    this.password = await hash(password, Number(salt));
   }
 
   public async verifyPassword(password: string, salt: string): Promise<boolean> {

@@ -1,11 +1,11 @@
-import { injectable, inject } from 'inversify';
-import { types, DocumentType }from '@typegoose/typegoose';
+import { inject, injectable } from 'inversify';
+import { DocumentType, types } from '@typegoose/typegoose';
 import { OfferService } from './offer-service.interface.js';
-import { OfferEntity } from './offer.entity.js';
-import { CreateOfferDto } from './dto/create-offer.dto.js';
 import { Component } from '../../types/index.js';
 import { Logger } from '../../libs/logger/index.js';
-import { CommentModel, CommentEntity } from '../comment/comment.entity.js';
+import { OfferEntity } from './offer.entity.js';
+import { CreateOfferDto } from './dto/create-offer.dto.js';
+import { UpdateOfferDto } from './dto/update-offer.dto.js';
 
 @injectable()
 export class DefaultOfferService implements OfferService {
@@ -16,38 +16,60 @@ export class DefaultOfferService implements OfferService {
 
   public async create(dto: CreateOfferDto): Promise<DocumentType<OfferEntity>> {
     const result = await this.offerModel.create(dto);
-    this.logger.info(`New offer created: ${result.title} (ID: ${result.id})`);
-    return result as unknown as DocumentType<OfferEntity>;
+    this.logger.info(`New offer created: ${dto.title}`);
+
+    return result.populate(['userId']) as Promise<DocumentType<OfferEntity>>;
   }
 
-  public async incCommentCount(offerId: string): Promise<DocumentType<OfferEntity> | null> {
-    const result = await this.offerModel
-      .findByIdAndUpdate(offerId, { $inc: { commentsCount: 1 } }, { new: true })
-      .exec() as DocumentType<OfferEntity> | null;
-    return result;
+  public async findById(offerId: string): Promise<DocumentType<OfferEntity> | null> {
+    return this.offerModel
+      .findById(offerId)
+      .populate(['userId'])
+      .exec() as Promise<DocumentType<OfferEntity> | null>;
   }
 
-  public async updateRating(offerId: string): Promise<DocumentType<OfferEntity> | null> {
-    const comments = await CommentModel.find({ offerId }) ;
-    if (comments.length === 0) {
-      return await this.offerModel
-        .findByIdAndUpdate(offerId, { rating: 0 }, { new: true })
-        .exec() as DocumentType<OfferEntity> | null;
-    }
+  public async find(): Promise<DocumentType<OfferEntity>[]> {
+    return this.offerModel
+      .find()
+      .populate(['userId'])
+      .limit(60)
+      .sort({ postDate: -1 })
+      .exec() as Promise<DocumentType<OfferEntity>[]>;
+  }
 
-    let sumRating = 0;
-    for (const comment of comments) {
-      sumRating += comment.rating;
-    }
-    const newRating = sumRating / comments.length;
+  public async deleteById(offerId: string): Promise<DocumentType<OfferEntity> | null> {
+    return this.offerModel
+      .findByIdAndDelete(offerId)
+      .exec() as Promise<DocumentType<OfferEntity> | null>;
+  }
 
-    const result = await this.offerModel
-      .findByIdAndUpdate(offerId, { rating: newRating }, { new: true })
-      .exec() as DocumentType<OfferEntity> | null;
-    return result;
+  public async updateById(offerId: string, dto: UpdateOfferDto): Promise<DocumentType<OfferEntity> | null> {
+    return this.offerModel
+      .findByIdAndUpdate(offerId, dto, { new: true })
+      .populate(['userId'])
+      .exec() as Promise<DocumentType<OfferEntity> | null>;
   }
 
   public async exists(documentId: string): Promise<boolean> {
-    return (await this.offerModel.exists({ _id: documentId })) !== null;
+    return (await this.offerModel
+      .exists({ _id: documentId })) !== null;
+  }
+
+  public async incCommentCount(offerId: string): Promise<DocumentType<OfferEntity> | null> {
+    return this.offerModel
+      .findByIdAndUpdate(offerId, {
+        '$inc': {
+          commentsCount: 1,
+        }
+      }).exec() as Promise<DocumentType<OfferEntity> | null>;
+  }
+
+  public async findPremiumByCity(city: string): Promise<DocumentType<OfferEntity>[]> {
+    return this.offerModel
+      .find({ city: city, isPremium: true })
+      .sort({ postDate: -1 })
+      .limit(3)
+      .populate(['userId'])
+      .exec() as Promise<DocumentType<OfferEntity>[]>;
   }
 }
