@@ -47,11 +47,11 @@ export class FavoritesController extends BaseController {
   private async findFavorites() {
     return [
       {
-        id: '1784f737j',
+        id: '15454f737j',
         title: 'sometitle',
       },
       {
-        id: '383gt929po',
+        id: '383gt9232339po',
         title: 'sometitle',
       }
     ];

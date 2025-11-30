@@ -3,7 +3,6 @@ import { Offer, City, Goods, HousingType, Location } from '../../types/index.js'
 import { UserEntity } from '../user/user.entity.js';
 
 
-const CityValues: City[] = ['Paris', 'Cologne', 'Brussels', 'Amsterdam', 'Hamburg', 'Dusseldorf'];
 const GoodsValues = Object.values(Goods);
 const HousingTypeValues = Object.values(HousingType);
 
@@ -26,7 +25,7 @@ export class OfferEntity extends defaultClasses.TimeStamps implements Omit<Offer
   @prop({ required: true })
   public postDate!: Date;
 
-  @prop({ required: true, enum: CityValues })
+  @prop({ required: true, enum: City, type: () => String })
   public city!: City;
 
   @prop({ required: true, trim: true })
