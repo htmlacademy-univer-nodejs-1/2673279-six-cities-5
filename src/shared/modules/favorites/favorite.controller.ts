@@ -1,12 +1,17 @@
 import {BaseController, HttpError, HttpMethod} from '../../libs/rest/index.js';
 import {inject, injectable} from 'inversify';
-import {Component, offerIdType} from '../../types/index.js';
+import {Component} from '../../types/index.js';
 import {Logger} from '../../libs/logger/index.js';
 import {OfferService} from '../offer/index.js';
 import {Request, Response} from 'express';
 import {fillDTO} from '../../helpers/index.js';
 import {OfferRdo} from '../offer/rdo/offer.rdo.js';
 import {StatusCodes} from 'http-status-codes';
+
+export type offerIdType = {
+  offerId: string;
+}
+
 
 @injectable()
 export class FavoritesController extends BaseController {
@@ -42,11 +47,11 @@ export class FavoritesController extends BaseController {
   private async findFavorites() {
     return [
       {
-        id: '1784f737j',
+        id: '15454f737j',
         title: 'sometitle',
       },
       {
-        id: '383gt929po',
+        id: '383gt9232339po',
         title: 'sometitle',
       }
     ];
