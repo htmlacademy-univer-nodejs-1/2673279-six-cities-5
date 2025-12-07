@@ -1,7 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { BaseController, HttpError, HttpMethod, ValidateObjectIdMiddleware } from '../../libs/rest/index.js';
+import { BaseController, HttpError, HttpMethod, PrivateRouteMiddleware, ValidateDtoMiddleware, ValidateObjectIdMiddleware } from '../../libs/rest/index.js';
 import { Component } from '../../types/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { CommentService } from './comment-service.interface.js';
@@ -9,6 +9,9 @@ import { OfferService } from '../offer/offer-service.interface.js';
 import { CreateCommentDto } from './dto/create-comment.dto.js';
 import { fillDTO } from '../../helpers/index.js';
 import { CommentRdo } from './rdo/comment.rdo.js';
+import { RequestBody, RequestParams } from '../../libs/rest/index.js';
+
+export type CreateCommentRequest = Request<RequestParams, RequestBody, CreateCommentDto>;
 
 @injectable()
 export default class CommentController extends BaseController {
@@ -25,7 +28,7 @@ export default class CommentController extends BaseController {
       path: '/:offerId',
       method: HttpMethod.Post,
       handler: this.create,
-      middlewares: [new ValidateObjectIdMiddleware('offerId')]
+      middlewares: [new ValidateDtoMiddleware(CreateCommentDto), new PrivateRouteMiddleware(),]
     });
 
     this.addRoute({
@@ -37,22 +40,19 @@ export default class CommentController extends BaseController {
   }
 
   public async create(
-    { body, params }: Request<Record<string, string>, Record<string, unknown>, CreateCommentDto>,
+    { body, tokenPayload }: CreateCommentRequest,
     res: Response
   ): Promise<void> {
-    const { offerId } = params;
-
-    if (!await this.offerService.exists(offerId)) {
+    if (! await this.offerService.exists(body.offerId)) {
       throw new HttpError(
         StatusCodes.NOT_FOUND,
-        `Offer with id ${offerId} not found.`,
+        `Offer with id ${body.offerId} not found.`,
         'CommentController'
       );
     }
 
-    const comment = await this.commentService.create({ ...body, offerId });
-    await this.offerService.incCommentCount(offerId);
-
+    const comment = await this.commentService.create({ ...body, userId: tokenPayload.id });
+    await this.offerService.incCommentCount(body.offerId);
     this.created(res, fillDTO(CommentRdo, comment));
   }
 

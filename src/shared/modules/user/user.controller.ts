@@ -1,6 +1,6 @@
 import { inject, injectable } from 'inversify';
 import { Request, Response } from 'express';
-import { BaseController, HttpMethod, UploadFileMiddleware } from '../../libs/rest/index.js';
+import { BaseController, HttpError, HttpMethod, UploadFileMiddleware } from '../../libs/rest/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { Component } from '../../types/index.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
@@ -37,6 +37,11 @@ export class UserController extends BaseController {
       path: '/login',
       method: HttpMethod.Post,
       handler: this.login
+    });
+    this.addRoute({
+      path: '/login',
+      method: HttpMethod.Get,
+      handler: this.checkAuthenticate,
     });
     this.addRoute({
       path: '/:userId/avatar',
@@ -85,5 +90,19 @@ export class UserController extends BaseController {
     this.created(res, {
       filepath: req.file?.path
     });
+  }
+
+  public async checkAuthenticate({ tokenPayload: { email }}: Request, res: Response) {
+    const foundedUser = await this.userService.findByEmail(email);
+
+    if (! foundedUser) {
+      throw new HttpError(
+        StatusCodes.UNAUTHORIZED,
+        'Unauthorized',
+        'UserController'
+      );
+    }
+
+    this.ok(res, fillDTO(LoggedUserRdo, foundedUser));
   }
 }
