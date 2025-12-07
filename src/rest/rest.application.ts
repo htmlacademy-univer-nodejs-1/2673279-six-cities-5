@@ -19,7 +19,6 @@ export class RestApplication {
     @inject(Component.UserController) private readonly userController: Controller,
     @inject(Component.OfferController) private readonly offerController: Controller,
     @inject(Component.FavoritesController) private readonly favoritesController: Controller,
-    @inject(Component.CommentController) private readonly commentController: Controller,
   ) {
     this.server = express();
   }
@@ -45,6 +44,10 @@ export class RestApplication {
     this.logger.info('Global middleware initialization');
 
     this.server.use(express.json());
+    this.server.use(
+      '/upload',
+      express.static(this.config.get('UPLOAD_DIRECTORY'))
+    );
   }
 
   private async _initControllers() {
@@ -52,7 +55,6 @@ export class RestApplication {
     this.server.use('/users', this.userController.router);
     this.server.use('/offers', this.offerController.router);
     this.server.use('/favorites', this.favoritesController.router);
-    this.server.use('/comments', this.commentController.router);
   }
 
   private async _initExceptionFilters() {
