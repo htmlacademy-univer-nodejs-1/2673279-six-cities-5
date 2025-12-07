@@ -10,6 +10,11 @@ import { OfferRdo } from './rdo/index.js';
 import { CreateOfferDto } from './dto/create-offer.dto.js';
 import { UpdateOfferDto } from './dto/update-offer.dto.js';
 import { ValidateObjectIdMiddleware, DocumentExistsMiddleware } from '../../libs/rest/index.js';
+import { PrivateRouteMiddleware } from '../../libs/rest/middleware/private-route.middleware.js';
+import { RequestBody, RequestParams } from '../../libs/rest/index.js';
+
+export type CreateOfferRequest = Request<RequestParams, RequestBody, CreateOfferDto>;
+
 
 @injectable()
 export class OfferController extends BaseController {
@@ -22,14 +27,17 @@ export class OfferController extends BaseController {
     this.logger.info('Register routes for OfferController…');
 
     this.addRoute({ path: '/', method: HttpMethod.Get, handler: this.index });
-    this.addRoute({ path: '/', method: HttpMethod.Post, handler: this.create });
+    this.addRoute({ path: '/',
+      method: HttpMethod.Post,
+      middlewares: [new PrivateRouteMiddleware()],
+      handler: this.create });
     this.addRoute({ path: '/premium/:city', method: HttpMethod.Get, handler: this.getPremium });
     this.addRoute({ path: '/:offerId', method: HttpMethod.Get, handler: this.show, middlewares: [new ValidateObjectIdMiddleware('offerId'),
       new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'),] });
     this.addRoute({ path: '/:offerId', method: HttpMethod.Delete, handler: this.delete, middlewares: [new ValidateObjectIdMiddleware('offerId'),
-      new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'),] });
+      new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'), new PrivateRouteMiddleware(),] });
     this.addRoute({ path: '/:offerId', method: HttpMethod.Patch, handler: this.update, middlewares: [new ValidateObjectIdMiddleware('offerId'),
-      new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'),] });
+      new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId'), new PrivateRouteMiddleware()] });
   }
 
   public async index(_req: Request, res: Response): Promise<void> {
@@ -37,8 +45,8 @@ export class OfferController extends BaseController {
     this.ok(res, fillDTO(OfferRdo, offers));
   }
 
-  public async create({ body }: Request<Record<string, unknown>, Record<string, unknown>, CreateOfferDto>, res: Response): Promise<void> {
-    const result = await this.offerService.create(body);
+  public async create({ body, tokenPayload }: CreateOfferRequest, res: Response): Promise<void> {
+    const result = await this.offerService.create({ ...body, userId: tokenPayload.id });
     this.created(res, fillDTO(OfferRdo, result));
   }
 

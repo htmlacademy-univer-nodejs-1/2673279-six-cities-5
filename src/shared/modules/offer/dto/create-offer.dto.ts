@@ -80,4 +80,6 @@ export class CreateOfferDto {
   @ValidateNested()
   @Type(() => CreateOfferCoordinatesDto)
   public coordinates!: CreateOfferCoordinatesDto;
+
+  public userId!: string;
 }

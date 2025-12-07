@@ -6,6 +6,7 @@ import { getMongoURI } from '../shared/helpers/index.js';
 import { injectable, inject } from 'inversify';
 import { Controller, ExceptionFilter } from '../shared/libs/rest/index.js';
 import express, { Express } from 'express';
+import { ParseTokenMiddleware } from '../shared/libs/rest/middleware/parse-token.middleware.js';
 
 @injectable()
 export class RestApplication {
@@ -19,6 +20,7 @@ export class RestApplication {
     @inject(Component.UserController) private readonly userController: Controller,
     @inject(Component.OfferController) private readonly offerController: Controller,
     @inject(Component.FavoritesController) private readonly favoritesController: Controller,
+    @inject(Component.AuthExceptionFilter) private readonly authExceptionFilter: ExceptionFilter,
   ) {
     this.server = express();
   }
@@ -42,12 +44,14 @@ export class RestApplication {
 
   private async _initMiddleware() {
     this.logger.info('Global middleware initialization');
+    const authenticateMiddleware = new ParseTokenMiddleware(this.config.get('JWT_SECRET'));
 
     this.server.use(express.json());
     this.server.use(
       '/upload',
       express.static(this.config.get('UPLOAD_DIRECTORY'))
     );
+    this.server.use(authenticateMiddleware.execute.bind(authenticateMiddleware));
   }
 
   private async _initControllers() {
@@ -59,6 +63,7 @@ export class RestApplication {
 
   private async _initExceptionFilters() {
     this.logger.info('Exception filters initialization');
+    this.server.use(this.authExceptionFilter.catch.bind(this.authExceptionFilter));
     this.server.use(this.appExceptionFilter.catch.bind(this.appExceptionFilter));
   }
 

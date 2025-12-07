@@ -5,13 +5,14 @@ convict.addFormats(validator);
 
 export interface RestSchema {
   PORT: number;
-  SALT: string | null;
+  SALT: string;
   DB_HOST: string;
   DB_USER: string;
   DB_PASSWORD: string;
   DB_PORT: number;
   DB_NAME: string;
   UPLOAD_DIRECTORY: string;
+  JWT_SECRET: string;
 }
 
 export const restSchema = convict<RestSchema>({
@@ -25,7 +26,7 @@ export const restSchema = convict<RestSchema>({
     doc: 'Salt for password hashing',
     format: String,
     env: 'SALT',
-    default: null
+    default: ''
   },
   DB_HOST: {
     doc: 'IP address of the database server',
@@ -61,6 +62,12 @@ export const restSchema = convict<RestSchema>({
     doc: 'Directory for upload files',
     format: String,
     env: 'UPLOAD_DIRECTORY',
+    default: null
+  },
+  JWT_SECRET: {
+    doc: 'Secret for sign JWT',
+    format: String,
+    env: 'JWT_SECRET',
     default: null
   },
 });
