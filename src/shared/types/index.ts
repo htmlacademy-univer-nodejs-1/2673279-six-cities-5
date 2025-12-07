@@ -7,3 +7,4 @@ export * from './mock-offer.type.js';
 export * from './component.enum.js';
 export * from './offer-data.type.js';
 export * from './location.type.js';
+export * from './document-exists.interface.js';
