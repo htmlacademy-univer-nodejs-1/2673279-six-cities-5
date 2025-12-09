@@ -1,18 +1,28 @@
 openapi: 3.1.0
 info:
-  title: API сервер для проекта «Шесть городов»
-  description: Спецификация API, соответствующая текущей реализации кода.
+  title: API сервер для демо-проекта «Шесть городов».
+  description: |
+    * Список ресурсов и маршрутов сервера «Шесть городов».
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
   version: 2.0.0
 
 tags:
-  - name: Auth
-    description: Авторизация и пользователи
   - name: Offers
-    description: Управление объявлениями
+    description: Действия с объявлениями.
   - name: Comments
-    description: Комментарии
+    description: Действия с комментариями.
+  - name: Users
+    description: Действия с пользователем.
   - name: Favorites
-    description: Избранное
+    description: Действия с избранным.
+  - name: Categories
+    description: Действия с категориями.
+
+servers:
+  - url: /api
+    description: Development server
 
 components:
   securitySchemes:
@@ -371,7 +381,7 @@ paths:
       summary: Детальная информация о предложении
       tags: [Offers]
       security:
-        - TokenAuth: []
+        - TokenAuth: [] 
       responses:
         '200':
           description: Детальная информация
