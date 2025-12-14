@@ -35,13 +35,15 @@ components:
     CityName:
       type: string
       enum: [Paris, Cologne, Brussels, Amsterdam, Hamburg, Dusseldorf]
+    
     PropertyType:
       type: string
       enum: [apartment, house, room, hotel]
+      
     Amenities:
       type: string
       enum: [Breakfast, Air conditioning, Laptop friendly workspace, Baby seat, Washer, Towels, Fridge]
-    
+
     Coordinates:
       type: object
       additionalProperties: false
@@ -49,43 +51,11 @@ components:
       properties:
         latitude:
           type: number
-          format: float
-          minimum: -90
-          maximum: 90
         longitude:
           type: number
-          format: float
-          minimum: -180
-          maximum: 180
 
-    CreateUserDto:
+    UserResponse:
       type: object
-      additionalProperties: false
-      required: [email, name, password, type]
-      properties:
-        email:
-          type: string
-          format: email
-          maxLength: 255
-        name:
-          type: string
-          minLength: 1
-          maxLength: 15
-        password:
-          type: string
-          minLength: 6
-          maxLength: 12
-        type:
-          type: string
-          enum: [обычный, pro]
-          default: обычный
-        avatarUrl:
-          type: string
-          format: uri
-
-    User:
-      type: object
-      additionalProperties: false
       properties:
         id:
           type: string
@@ -100,9 +70,40 @@ components:
           type: string
           enum: [обычный, pro]
 
+    LoginUserDto:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    CreateUserDto:
+      type: object
+      required: [email, name, password, type]
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+          minLength: 1
+          maxLength: 15
+        password:
+          type: string
+          minLength: 6
+          maxLength: 12
+        type:
+          type: string
+          enum: [обычный, pro]
+        avatarUrl:
+          type: string
+          description: Ссылка на аватар (если файл уже загружен)
+
     CreateOfferDto:
       type: object
-      additionalProperties: false
       required: [title, description, city, previewImage, images, isPremium, type, bedrooms, maxAdults, price, goods, coordinates]
       properties:
         title:
@@ -117,12 +118,10 @@ components:
           $ref: '#/components/schemas/CityName'
         previewImage:
           type: string
-          format: uri 
         images:
           type: array
           items:
             type: string
-            format: uri
           minItems: 6
           maxItems: 6
         isPremium:
@@ -145,44 +144,47 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Amenities'
-          minItems: 1
         coordinates:
           $ref: '#/components/schemas/Coordinates'
-
+    
     UpdateOfferDto:
       type: object
-      additionalProperties: false
+      description: Частичное обновление полей
       properties:
         title:
-          $ref: '#/components/schemas/CreateOfferDto/properties/title'
+          type: string
+          minLength: 10
+          maxLength: 100
+        price:
+          type: integer
+          minimum: 100
+          maximum: 100000
         description:
-          $ref: '#/components/schemas/CreateOfferDto/properties/description'
+          type: string
+          minLength: 20
+          maxLength: 1024
 
-    Offer:
+    OfferResponse:
       allOf:
         - $ref: '#/components/schemas/CreateOfferDto'
         - type: object
-          additionalProperties: false
           properties:
             id:
               type: string
             postDate:
               type: string
               format: date-time
-            rating:
+            rating: 
               type: number
-              minimum: 1
-              maximum: 5
             commentsCount:
               type: integer
             host:
-              $ref: '#/components/schemas/User'
+               $ref: '#/components/schemas/UserResponse'
             isFavorite:
               type: boolean
 
     OfferShort:
       type: object
-      additionalProperties: false
       properties:
         id:
           type: string
@@ -207,12 +209,13 @@ components:
           type: integer
         isFavorite:
           type: boolean
-    
+
     CreateCommentDto:
       type: object
-      additionalProperties: false
-      required: [text, rating]
+      required: [offerId, text, rating]
       properties:
+        offerId:
+          type: string
         text:
           type: string
           minLength: 5
@@ -222,26 +225,26 @@ components:
           minimum: 1
           maximum: 5
 
-    Comment:
-      allOf:
-        - $ref: '#/components/schemas/CreateCommentDto'
-        - type: object
-          additionalProperties: false
-          properties:
-            id:
-              type: string
-            postDate:
-              type: string
-              format: date-time
-            author:
-              $ref: '#/components/schemas/User'
+    CommentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        rating:
+          type: integer
+        postDate:
+          type: string
+          format: date-time
+        user:
+          $ref: '#/components/schemas/UserResponse'
 
 paths:
-  /users:
+  /users/register:
     post:
-      summary: '5.8. Регистрация нового пользователя'
-      description: 'Доступен только анонимам.'
-      tags: ['Users']
+      summary: Регистрация нового пользователя
+      tags: [Auth]
       requestBody:
         required: true
         content:
@@ -254,17 +257,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '400':
-          description: Неверные данные пользователя
+                $ref: '#/components/schemas/UserResponse'
         '409':
-          description: Пользователь с таким email уже существует.
-  
+          description: Пользователь с таким email уже существует
+
   /users/login:
     post:
-      summary: '5.9. Вход в приложение'
-      description: 'Авторизует пользователя на основе логина и пароля.'
-      tags: ['Users']
+      summary: Вход в приложение
+      tags: [Auth]
       requestBody:
         required: true
         content:
@@ -283,12 +283,9 @@ paths:
                     type: string
         '401':
           description: Неверный логин или пароль
-
-  /users/status:
     get:
-      summary: '5.11. Проверка состояния пользователя'
-      description: 'Возвращает информацию по авторизованному пользователю.'
-      tags: ['Users']
+      summary: Проверка состояния пользователя
+      tags: [Auth]
       security:
         - TokenAuth: []
       responses:
@@ -297,15 +294,47 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserResponse'
         '401':
           description: Пользователь не авторизован
+    delete:
+      summary: Выход из приложения
+      tags: [Auth]
+      security:
+        - TokenAuth: []
+      responses:
+        '204':
+          description: Сеанс завершен (для сессионной куки)
+
+  /users/{userId}/avatar:
+    post:
+      summary: Загрузка аватара пользователя
+      tags: [Auth]
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Аватар успешно загружен
 
   /offers:
     get:
-      summary: '5.4. Список предложений'
-      description: 'Возвращает список предложений (по умолчанию 60). Отсортирован по дате.'
-      tags: ['Offers']
+      summary: Список предложений
+      tags: [Offers]
       parameters:
         - name: limit
           in: query
@@ -313,10 +342,9 @@ paths:
             type: integer
             default: 60
             maximum: 60
-          description: 'Количество предложений (макс. 60).'
       responses:
         '200':
-          description: Список предложений (краткий формат, 5.4.6)
+          description: Список предложений
           content:
             application/json:
               schema:
@@ -324,9 +352,8 @@ paths:
                 items:
                   $ref: '#/components/schemas/OfferShort'
     post:
-      summary: '5.1. Создать предложение'
-      description: 'Создает новое предложение. Только авторизованным.'
-      tags: ['Offers']
+      summary: Создать предложение
+      tags: [Offers]
       security:
         - TokenAuth: []
       requestBody:
@@ -341,11 +368,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Offer'
-        '400':
-          description: Неверные данные предложения
-        '401':
-          description: Не авторизован
+                $ref: '#/components/schemas/OfferResponse'
 
   /offers/{offerId}:
     parameters:
@@ -355,27 +378,25 @@ paths:
         schema:
           type: string
     get:
-      summary: '5.5. Детальная информация о предложении'
-      description: 'Возвращает полную информацию.'
-      tags: ['Offers']
+      summary: Детальная информация о предложении
+      tags: [Offers]
+      security:
+        - TokenAuth: [] 
       responses:
         '200':
-          description: Детальная информация о предложении
+          description: Детальная информация
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Offer'
+                $ref: '#/components/schemas/OfferResponse'
         '404':
           description: Предложение не найдено
-
     patch:
-      summary: '5.2. Редактировать предложение'
-      description: 'Редактирует свое предложение. Только авторизованным.'
-      tags: ['Offers']
+      summary: Редактировать предложение
+      tags: [Offers]
       security:
         - TokenAuth: []
       requestBody:
-        required: true
         content:
           application/json:
             schema:
@@ -386,37 +407,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Offer'
-        '400':
-          description: Неверные данные
-        '401':
-          description: Не авторизован
+                $ref: '#/components/schemas/OfferResponse'
         '403':
-          description: Нет прав для редактирования
-        '404':
-          description: Предложение не найдено
-
+          description: Нет прав на редактирование
     delete:
-      summary: '5.3. Удалить предложение'
-      description: 'Удаляет свое предложение. Только авторизованным.'
-      tags: ['Offers']
+      summary: Удалить предложение
+      tags: [Offers]
       security:
         - TokenAuth: []
       responses:
         '204':
           description: Предложение удалено
-        '401':
-          description: Не авторизован
         '403':
-          description: Нет прав для удаления
-        '404':
-          description: Предложение не найдено
+          description: Нет прав на удаление
 
   /offers/premium/{city}:
     get:
-      summary: '5.12. Премиальные предложения для города'
-      description: 'Возвращает до 3 премиальных предложений.'
-      tags: ['Offers']
+      summary: Премиальные предложения для города
+      tags: [Offers]
       parameters:
         - name: city
           in: path
@@ -430,34 +438,30 @@ paths:
             application/json:
               schema:
                 type: array
-                maxItems: 3
                 items:
                   $ref: '#/components/schemas/OfferShort'
 
   /favorites:
     get:
-      summary: '5.13. Список избранных предложений'
-      description: 'Возвращает предложения, добавленные в избранное. Только авторизованным.'
-      tags: ['Favorites']
+      summary: Список избранных предложений
+      tags: [Favorites]
       security:
         - TokenAuth: []
       responses:
         '200':
-          description: Список избранных предложений
+          description: Список избранного
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/OfferShort'
-        '401':
-          description: Не авторизован
 
-  /favorites/{offerId}:
+  /favorites/{offerId}/{status}:
     post:
-      summary: '5.14. Добавить в избранное'
-      description: 'Добавляет предложение в избранное. Только авторизованным.'
-      tags: ['Favorites']
+      summary: Изменить статус избранного
+      description: status 1 - добавить, 0 - удалить
+      tags: [Favorites]
       security:
         - TokenAuth: []
       parameters:
@@ -466,39 +470,44 @@ paths:
           required: true
           schema:
             type: string
+        - name: status
+          in: path
+          required: true
+          schema:
+            type: integer
+            enum: [0, 1]
       responses:
         '200':
-          description: Предложение добавлено в избранное
-        '401':
-          description: Не авторизован
-        '404':
-          description: Предложение не найдено
+          description: Статус избранного обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OfferResponse'
 
-    delete:
-      summary: '5.14. Удалить из избранного'
-      description: 'Удаляет предложение из избранного. Только авторизованным.'
-      tags: ['Favorites']
+  /comments:
+    post:
+      summary: Добавить комментарий
+      tags: [Comments]
       security:
         - TokenAuth: []
-      parameters:
-        - name: offerId
-          in: path
-          required: true
-          schema:
-            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentDto'
       responses:
-        '200':
-          description: Предложение удалено из избранного
-        '401':
-          description: Не авторизован
-        '404':
-          description: Предложение не найдено
+        '201':
+          description: Комментарий добавлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentResponse'
 
   /comments/{offerId}:
     get:
-      summary: '5.6. Комментарии предложения'
-      description: 'Возвращает до 50 последних комментариев.'
-      tags: ['Comments']
+      summary: Получить список комментариев
+      tags: [Comments]
       parameters:
         - name: offerId
           in: path
@@ -512,40 +521,5 @@ paths:
             application/json:
               schema:
                 type: array
-                maxItems: 50
                 items:
-                  $ref: '#/components/schemas/Comment'
-        '404':
-          description: Предложение не найдено
-
-    post:
-      summary: '5.7. Добавить комментарий'
-      description: 'Добавляет комментарий к предложению. Только авторизованным.'
-      tags: ['Comments']
-      security:
-        - TokenAuth: []
-      parameters:
-        - name: offerId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateCommentDto'
-      responses:
-        '201':
-          description: Комментарий добавлен
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Comment'
-        '400':
-          description: Неверные данные комментария
-        '401':
-          description: Не авторизован
-        '404':
-          description: Предложение не найдено
+                  $ref: '#/components/schemas/CommentResponse'
